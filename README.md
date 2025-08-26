@@ -9,7 +9,7 @@
 
 A  API é construída com **Node.js** e **Express**, e pode ser executada facilmente usando o **Yarn** e o **Docker**, tornando o ambiente de desenvolvimento ágil e portátil.
 
-## 🚀 Tecnologias Utilizadas
+## Tecnologias Utilizadas
 
 * **Node.js**: Ambiente de execução JavaScript.
 * **Express**: Framework web para Node.js.
