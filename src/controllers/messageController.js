@@ -3,16 +3,21 @@ const prisma = new PrismaClient();
 
 exports.createMessage = async (req, res) => {
     const { content } = req.body;
-    const authorId = req.user.id; 
+    const { id: reciverId } = req.params;
+    const authorId = req.user.id;
 
     try {
         const message = await prisma.message.create({
             data: {
                 content,
-                authorId
+                authorId,
+                reciverId
             },
             include: {
                 author: {
+                    select: { id: true, name: true, email: true }
+                },
+                reciver: {
                     select: { id: true, name: true, email: true }
                 }
             }
@@ -29,6 +34,9 @@ exports.getMessages = async (req, res) => {
         const messages = await prisma.message.findMany({
             include: {
                 author: {
+                    select: { id: true, name: true, email: true }
+                },
+                reciver: {
                     select: { id: true, name: true, email: true }
                 }
             },
