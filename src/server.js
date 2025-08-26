@@ -27,24 +27,48 @@ wss.on('connection', ws => {
     ws.on('message', async message => {
         try {
             const data = JSON.parse(message);
-            const { content, userId } = data;
 
-            if (content && userId) {
+            if (data.type === 'auth') {
+                ws.userId = data.userId;
+                return;
+            }
+
+            const { content, userId, reciverId } = data;
+
+            if (content && userId && reciverId) {
                 const newMessage = await prisma.message.create({
                     data: {
                         content,
                         author: {
-                            connect: { id: parseInt(userId) }
+                            connect: { id: userId }
+                        },
+                        reciver: {
+                            connect: { id: reciverId }
                         }
                     },
                     include: {
-                        author: true
+                        author: true,
+                        reciver: true
+                    },
+                });
+
+                //Nesta parte deve enviar a mensagem para um cliente específico
+                wss.clients.forEach(client => {
+                    if (
+                        client.readyState === WebSocket.OPEN
+                        &&
+                        client.userId === reciverId
+                    ) {
+                        client.send(JSON.stringify(newMessage));
                     }
                 });
 
-                // Envia a nova mensagem para todos os clientes conectados
                 wss.clients.forEach(client => {
-                    if (client.readyState === WebSocket.OPEN) {
+                    if (
+                        client.readyState === WebSocket.OPEN
+                        &&
+                        client.userId === userId
+                    ) {
                         client.send(JSON.stringify(newMessage));
                     }
                 });
